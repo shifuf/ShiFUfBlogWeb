@@ -9,10 +9,26 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "vue": "^3.5.13"
+    "@ant-design/icons-vue": "^7.0.1",
+    "@tsparticles/slim": "^3.8.1",
+    "@tsparticles/vue3": "^3.0.1",
+    "@vueuse/core": "^13.2.0",
+    "@vueuse/integrations": "^13.2.0",
+    "ant-design-vue": "^4.2.6",
+    "axios": "^1.9.0",
+    "bootstrap-icons": "^1.13.1",
+    "md-editor-v3": "^5.5.1",
+    "pinia": "^3.0.2",
+    "pinia-plugin-persistedstate": "^4.3.0",
+    "sass": "^1.88.0",
+    "universal-cookie": "^7.2.2",
+    "vue": "^3.5.13",
+    "vue-router": "^4.5.1"
   },
   "devDependencies": {
-    "@vitejs/plugin-vue": "^5.2.3",
+    "@vitejs/plugin-vue": "^5.2.4",
+    "unplugin-auto-import": "^19.2.0",
+    "unplugin-vue-components": "^28.5.0",
     "vite": "^6.3.5"
   }
 }

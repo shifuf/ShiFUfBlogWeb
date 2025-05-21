@@ -1,0 +1,57 @@
+* {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  box-sizing: border-box;
+}
+button,
+input,
+select,
+textarea {
+  background-color: transparent;
+  border-style: none;
+}
+a {
+  text-decoration: none;
+  color: inherit;
+  transition: all .3s ease-out 0s;
+}
+$aside-card-radius: 12px;
+:root {
+    /* 定义浅色模式下的颜色变量 */
+    --bg-color: #f7f9fe;;
+    --text-color: #1d1e22;
+    --text-highlight-color: #ffffff;
+    --tags-color: #363636;
+    --card-bg-color: #ffffff;
+    --border-color:#e3e8f7;
+    --shadow-border: 0 8px 16px -4px #2c2d300c;;
+    --card-content-bg:#3b70fc;
+    --card-content-op-deep:#3b70fcdd ;
+    --text-black: rgba(231, 193, 193, 0.5);
+    // 文章详情
+    --deal-text-bg-color: rgba(255, 255, 255, 0.2);;
+    transition: color 0.5s ease;
+    --userinfo-span-color: #b1b1b1;
+    --useinfo-input-bg: #f5f6f7;
+  }
+.dark {
+    /* 定义深色模式下的颜色变量 */
+    --bg-color: #16161a;
+    --text-color: #fff;
+    --card-bg-color:#2a2a2a;
+    --border-color:#3d3d3f;
+    --shadow-border: 0 5px 12px -5px rgba(102, 68, 68, 0.0);
+    --Jay-card-bg: #1d1e22;
+    --userinfo-span-color: #636469;
+    --useinfo-input-bg: #292a2d;
+    .md-editor div.default-theme {
+      background-color: #2a2a2a;
+    }
+  }
+  body{
+    background-color: var(--bg-color);
+    color: var(--text-color);
+  }
+  // 盒子宽度
+$box-width: 1400px;

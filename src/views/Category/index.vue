@@ -5,6 +5,7 @@
         <div class="list" v-if="paramsId">
           <WidgetTags
             :list="categoryList"
+            :name="'categoryName'"
             :path="'category'"
             @tagChange="handleTagChange"
           ></WidgetTags>
@@ -81,12 +82,12 @@
               <li
                 v-for="(category, index) in categoryList"
                 :key="index"
-                :style="{ background: getRandomGradient() }"
+                :style="getRandomGradient()"
               >
                 <router-link
                   :to="`/category/${category.id}`"
                   class="category-link"
-                  >| {{ category.name }}</router-link
+                  >| {{ category.categoryName }}</router-link
                 >
                 <div class="icon-text">
                   <i class="fas fa-folder"></i>
@@ -134,21 +135,15 @@ const handleTagChange = (id) => {
   });
 };
 
-// 随机生成一个十六进制颜色
-function getRandomColor() {
-  return (
-    "#" +
-    Math.floor(Math.random() * 0xffffff)
-      .toString(16)
-      .padStart(6, "0")
-  );
-}
-
 // 返回随机渐变背景
 function getRandomGradient() {
-  const color1 = getRandomColor();
-  const color2 = getRandomColor();
-  return `linear-gradient(90deg, ${color1}, ${color2})`;
+  let R = Math.floor(Math.random() * 130 + 110);
+  let G = Math.floor(Math.random() * 130 + 110); // 注意原代码中的G和B被误置了位置，这里做了修正
+  let B = Math.floor(Math.random() * 130 + 110);
+  return {
+     background: 'linear-gradient(to left, rgba(' + R + ',' + B + ',' + G + '0.8))'
+  };
+  // return `linear-gradient(90deg, ${color1}, ${color2})`;
 }
 // 路由参数监听（核心优化点）
 watch(
@@ -174,6 +169,7 @@ onMounted(() => {
   max-width: 1400px;
   // display: flex;
   // justify-content: space-between;
+  height: 80vh;
   margin: 0 auto;
   padding: 10rem 20px;
   .box_card {
@@ -321,7 +317,8 @@ onMounted(() => {
 
         .category-link {
           font-size: 16px;
-          color: white;
+          color: #fff;
+          font-weight: 600;
           text-decoration: none;
           margin: 0;
           padding-left: 5px;
@@ -331,7 +328,7 @@ onMounted(() => {
         .icon-text {
           display: flex;
           align-items: center;
-          color: white;
+          color: #fff;
           margin-top: 10px;
 
           i {

@@ -1,71 +1,59 @@
 <template>
-  <div class="message-page">
-    <div class="container">
-      <div class="page-header">
-        <h1>留言板</h1>
-        <p>欢迎在此留下您的宝贵意见和建议</p>
-      </div>
-
-      <!-- 发布留言表单 -->
-      <div class="message-form-container">
-        <h2>发表留言</h2>
-        <a-form :model="messageForm" @finish="handleSubmit">
-          <a-form-item v-if="!isLoggedIn" name="userName" :rules="[{ required: true, message: '请输入您的昵称!' }]">
-            <a-input v-model:value="messageForm.userName" placeholder="昵称" />
-          </a-form-item>
-          <a-form-item v-if="!isLoggedIn" name="userEmail" :rules="[{ required: true, type: 'email', message: '请输入有效的邮箱!' }]">
-            <a-input v-model:value="messageForm.userEmail" placeholder="邮箱" />
-          </a-form-item>
-          <a-form-item name="content" :rules="[{ required: true, message: '请输入留言内容!' }]">
-            <a-textarea 
-              v-model:value="messageForm.content" 
-              placeholder="请输入您的留言..." 
-              :rows="4" 
-            />
-          </a-form-item>
-          <a-form-item>
-            <a-button type="primary" html-type="submit" :loading="submitting">发表留言</a-button>
-          </a-form-item>
-        </a-form>
-      </div>
-
-      <!-- 留言列表 -->
-      <div class="message-list">
-        <h2>留言列表</h2>
-        
-        <div v-if="loading" class="loading-container">
-          <a-spin tip="加载中..."></a-spin>
-    </div>
-        
-        <div v-else-if="messages.length === 0" class="empty-message">
-          <a-empty description="暂无留言" />
-        </div>
-        
-        <div v-else class="comments">
-          <!-- 使用递归组件显示消息和回复 -->
-          <MessageItem
-            v-for="message in messages" 
-            :key="message.id"
-            :message="message"
-            :is-logged-in="isLoggedIn"
-            :replying-to="replyingTo"
-            :reply-form="replyForm"
-            :replying="replying"
-            @reply="handleReply"
-            @toggle-reply="toggleReply"
-            @like="handleLike"
+  <div class="message-board">
+    <!-- 发布留言表单 -->
+    <div class="message-form-container">
+      <h2>发表留言</h2>
+      <a-form :model="messageForm" @finish="handleSubmit">
+        <a-form-item v-if="!isLoggedIn" name="userName" :rules="[{ required: true, message: '请输入您的昵称!' }]">
+          <a-input v-model:value="messageForm.userName" placeholder="昵称" />
+        </a-form-item>
+        <a-form-item v-if="!isLoggedIn" name="userEmail" :rules="[{ required: true, type: 'email', message: '请输入有效的邮箱!' }]">
+          <a-input v-model:value="messageForm.userEmail" placeholder="邮箱" />
+        </a-form-item>
+        <a-form-item name="content" :rules="[{ required: true, message: '请输入留言内容!' }]">
+          <a-textarea 
+            v-model:value="messageForm.content" 
+            placeholder="请输入您的留言..." 
+            :rows="4" 
           />
-        </div>
+        </a-form-item>
+        <a-form-item>
+          <a-button type="primary" html-type="submit" :loading="submitting">发表留言</a-button>
+        </a-form-item>
+      </a-form>
+    </div>
+    
+    <!-- 留言列表 -->
+    <div class="message-list">
+      <h2>留言列表</h2>
+      
+      <div v-if="loading" class="loading-container">
+        <a-spin tip="加载中..."></a-spin>
       </div>
-
+      
+      <div v-else-if="messages.length === 0" class="empty-message">
+        <a-empty description="暂无留言" />
+      </div>
+      
+      <div v-else class="comments">
+        <!-- 使用递归组件显示消息和回复 -->
+        <MessageItem
+          v-for="message in messages" 
+          :key="message.id"
+          :message="message"
+          :is-logged-in="isLoggedIn"
+          @reply="handleReply"
+          @toggle-reply="toggleReply"
+          @like="handleLike"
+        />
+      </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, reactive, onMounted, computed, defineAsyncComponent, provide } from 'vue';
+import { ref, reactive, onMounted, computed, defineAsyncComponent, provide, watch } from 'vue';
 import { message } from 'ant-design-vue';
-
 import { 
   getMessageList, 
   addMessage, 
@@ -73,25 +61,26 @@ import {
   likeMessage 
 } from '@/api/message';
 import { useUserStore } from '@/stores/modules/user';
+import MessageItem from '@/components/MessageItem/index.vue';
 
-
-// 递归组件
-const MessageItem = defineAsyncComponent(() => import('@/components/MessageItem/index.vue'));
+const props = defineProps({
+  articleId: {
+    type: [Number, String],
+    default: 0 // 0表示留言板，其他值表示文章的ID
+  }
+});
 
 // 用户信息
 const userStore = useUserStore();
 const isLoggedIn = computed(() => userStore.isLoggedIn);
 const userInfo = computed(() => userStore.userInfo || {});
 
-// 默认头像
-const defaultAvatar = 'https://via.placeholder.com/100';
-
 // 留言表单
 const messageForm = reactive({
   content: '',
   userName: '',
   userEmail: '',
-  articleId: 0  // 0 表示留言板
+  articleId: computed(() => props.articleId) // 使用传入的articleId
 });
 
 // 回复表单
@@ -99,7 +88,7 @@ const replyForm = reactive({
   content: '',
   userName: '',
   userEmail: '',
-  articleId: 0,
+  articleId: computed(() => props.articleId), // 使用传入的articleId
   parentId: null,
   replyUserId: null
 });
@@ -117,7 +106,6 @@ provide('replyingTo', replyingTo);
 provide('replyForm', replyForm);
 provide('replying', replying);
 
-
 // 递归加载所有子回复
 const loadRepliesRecursive = async (parentId) => {
   try {
@@ -126,7 +114,7 @@ const loadRepliesRecursive = async (parentId) => {
       pageSize: 100
     };
     
-    const res = await getMessageList(params, 0, parentId);
+    const res = await getMessageList(params, props.articleId, parentId);
     if (res.code === 200) {
       const replies = res.data.rows;
       
@@ -157,7 +145,7 @@ const fetchMessages = async () => {
       orderType: 'desc'
     };
     
-    const res = await getMessageList(params, 0, 0);
+    const res = await getMessageList(params, props.articleId, 0);
     if (res.code === 200) {
       messages.value = res.data.rows;
       
@@ -284,7 +272,7 @@ const handleReply = async (messageId) => {
 const handleLike = async (id) => {
   try {
     const res = await likeMessage(id);
-  if (res.code === 200) {
+    if (res.code === 200) {
       // 更新本地状态 - 递归查找留言或回复
       const updateMessageLike = (list) => {
         for (let i = 0; i < list.length; i++) {
@@ -305,7 +293,7 @@ const handleLike = async (id) => {
       
       updateMessageLike(messages.value);
       message.success(res.data ? '点赞成功' : '取消点赞');
-  } else {
+    } else {
       message.error(res.msg || '操作失败');
     }
   } catch (error) {
@@ -314,51 +302,26 @@ const handleLike = async (id) => {
   }
 };
 
+// 监听articleId变化，重新加载留言
+watch(() => props.articleId, (newVal) => {
+  if (newVal !== undefined) {
+    fetchMessages();
+  }
+});
+
 // 初始化
 onMounted(() => {
   fetchMessages();
 });
-
-// 具函数给子组件使用
-// const utils = {
-//   formatTimeAgo,
-//   replyingTo,
-//   replyForm,
-//   replying
-// };
-</script>  
+</script>
 
 <style lang="scss" scoped>
-.message-page {
-  padding: 4rem 0;
-  // background-color: #f5f5f5;
-  min-height: 100vh;
-  margin-top: 5rem;
-  .container {
-    max-width: 900px;
-  margin: 0 auto;
-    padding: 0 15px;
-  }
-  
-  .page-header {
-    text-align: center;
-    margin-bottom: 2rem;
-    
-    h1 {
-      font-size: 2.2rem;
-      color: #333;
-      margin-bottom: 0.5rem;
-    }
-    
-    p {
-      color: #666;
-      font-size: 1rem;
-    }
-  }
+.message-board {
+  margin-top: 2rem;
   
   .message-form-container {
-  background-color: #fff;
-  border-radius: 8px;
+    background-color: var(--card-bg-color, #fff);
+    border-radius: 8px;
     padding: 1.5rem;
     margin-bottom: 2rem;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
@@ -372,7 +335,7 @@ onMounted(() => {
   }
   
   .message-list {
-    background-color: #fff;
+    background-color: var(--card-bg-color, #fff);
     border-radius: 8px;
     padding: 1.5rem;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
@@ -393,31 +356,14 @@ onMounted(() => {
       padding: 2rem 0;
     }
   }
-  
-  // 调试面板样式
-  .debug-panel {
-    margin-top: 2rem;
-    padding: 1rem;
-    background-color: #f0f8ff;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    
-    h3 {
-      margin-top: 0;
-      margin-bottom: 0.5rem;
-  color: #333;
-    }
-    
-    p {
-      margin: 0.25rem 0;
-      font-family: monospace;
-    }
-  }
 }
 
 @media (max-width: 768px) {
-  .message-page {
-    padding: 3rem 0;
+  .message-board {
+    .message-form-container, 
+    .message-list {
+      padding: 1rem;
+    }
   }
 }
-</style>
+</style> 

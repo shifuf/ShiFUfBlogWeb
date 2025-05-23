@@ -33,40 +33,66 @@
 //     method: 'get'
 //   });
 // }    
-import request from '../../utils/request'
+import request from '@/utils/request'
 
 /**
- * 获取留言列表
- * @param {Object} params - 查询参数
- * @param {number} params.articleId - 文章ID，0表示留言板
- * @param {number} params.pageNum - 当前页码
- * @param {number} params.pageSize - 每页条数
+ * 分页获取留言/评论列表
+ * @param {Object} pageParams - 分页参数
+ * @param {Number} articleId - 文章ID，-1查询所有文章评论，0查询留言板留言，null/未指定查询全部
+ * @param {Number} parentId - 父级留言ID，默认为0
  */
-export function getMessageList(params) {
+export function getMessageList(pageParams, articleId, parentId = 0) {
   return request({
     url: '/message/list',
     method: 'get',
-    params
-  })
+    params: {
+      ...pageParams,
+      articleId,
+      parentId
+    }
+  });
 }
 
 /**
- * 添加留言
- * @param {Object} data - 留言数据
- * @param {string} data.content - 留言内容
- * @param {string} [data.userName] - 用户名称（游客留言时需要）
- * @param {number} [data.articleId] - 文章ID，默认为0（留言板）
- * @param {number} [data.parentId] - 父留言ID，用于回复
+ * 发布留言/评论
+ * @param {Object} data - 留言数据对象
  */
 export function addMessage(data) {
   return request({
     url: '/message/add',
     method: 'post',
-    data,
+    data: data,
     headers: {
       'Content-Type': 'application/json' // 明确指定 Content-Type 为 application/json
     }
-  })
+  });
+}
+
+/**
+ * 回复留言/评论
+ * @param {Object} data - 回复数据对象
+ */
+export function replyMessage(data) {
+  return request({
+    url: '/message/reply',
+    method: 'post',
+    data: data,
+    headers: {
+      'Content-Type': 'application/json' // 明确指定 Content-Type 为 application/json
+    }
+  });
+}
+
+/**
+ * 点赞/取消点赞留言
+ * @param {Number} id - 留言ID
+ */
+export function likeMessage(id) {
+  return request({
+    url: '/message/like',
+    method: 'get',
+    params: { id }
+  });
 }
 
 /**

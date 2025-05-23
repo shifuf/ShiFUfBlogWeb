@@ -4,10 +4,19 @@ import App from './App.vue'
 import "@/assets/styles/global.scss"
 //Bootstrap 图标库
 import "bootstrap-icons/font/bootstrap-icons.css"
-const app = createApp(App);
-//路由
 import router from './router/index'
-app.use(router);
+import pinia from './stores/index'
+import Antd from 'ant-design-vue'
+import 'ant-design-vue/dist/reset.css'
+
+
+const app = createApp(App)
+
+
+
+app.use(router)
+app.use(pinia)
+app.use(Antd)
 
 //粒子特效
 import Particles from "@tsparticles/vue3";
@@ -17,14 +26,6 @@ app.use(Particles ,{
       await loadSlim(engine);
     },
   });
-//Antd UI
-import Antd from 'ant-design-vue';
-import 'ant-design-vue/dist/reset.css';
-app.use(Antd);
 
-// Pinia
-import pinia from './stores/index'
-app.use(pinia);
-
-app.mount('#app');
+app.mount('#app')
 

@@ -31,3 +31,49 @@ export function getArticleListByUserId(type) {
         params: { type }
     });
 }
+
+/**
+ * 文章点赞
+ */
+export function likeArticle(id) {
+    return request({
+        url: '/article/like',
+        method: 'get',
+        params: { id }
+    });
+}
+
+/**
+ * 文章收藏
+ */
+export function favoriteArticle(id) {
+    return request({
+        url: '/article/favorite',
+        method: 'get',
+        params: { id }
+    });
+}
+
+/**
+ * 搜索文章
+ */
+export function searchArticles(keyword, pageParams) {
+    return request({
+        url: '/article/search',
+        method: 'get',
+        params: {
+            keyword,
+            ...pageParams
+        }
+    });
+}
+
+/**
+ * 获取热门标签
+ */
+export function getHotTags() {
+    return request({
+        url: '/article/hotTags',
+        method: 'get'
+    });
+}

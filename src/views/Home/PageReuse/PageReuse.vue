@@ -76,7 +76,6 @@ const props = defineProps({
   justify-content: space-between;
   margin: 0 auto;
   padding: 5rem 20px;
-
   // 左侧最近文章
   .list {
     display: flex;

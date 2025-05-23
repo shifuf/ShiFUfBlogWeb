@@ -1,18 +1,18 @@
 <template>
-  <header class="header">
-
+  <header class="header" :style="articleDetail.articleCover ? { backgroundImage: `url(${articleDetail.articleCover})` } : {}">
+    <div class="bg-overlay"></div>
     <div class="info" >
       <div class="firstinfo">
         <div class="meta-firstline">
           <!-- <RouterLink class="meta-original" to="/" title="转载">转载</RouterLink> -->
           <!-- 分类 -->
           <span class="meta-categories">
-            <RouterLink to="/">{{ articleDetail. categoryName}}</RouterLink>
+            <RouterLink :to="`/category/${articleDetail.categoryId}`">{{ articleDetail. categoryName}}</RouterLink>
           </span>
           <!-- 标签 -->
           <div class="tag_share" v-for="item in articleDetail.tag">
             <div class="meta__tag-list">
-              <RouterLink class="meta__tags" to="/"><i class="iconfont jinghao"></i>#{{item.tagName}}</RouterLink>
+              <RouterLink class="meta__tags" :to="`/tag/${item.id}`"><i class="iconfont jinghao"></i>#{{item.tagName}}</RouterLink>
               <!-- <RouterLink class="meta__tags" to="/"><i class="iconfont jinghao"></i>Nuxt</RouterLink> -->
             </div>
           </div>
@@ -24,7 +24,7 @@
           <div class="meta__date">
             发布时间<time class=" shijian">{{articleDetail.updateTime}}</time>
           </div>
-          <div><i class="iconfont  bi-file-earmark-font"></i>{{countMd}}</div>
+          <div>字数统计<i class="iconfont  bi-file-earmark-font"></i>{{countMd}}</div>
           <div><i class="iconfont bi-eye"></i>{{articleDetail.viewCount}}</div>
           <div><i class="iconfont bi-heart"></i>{{articleDetail.countLike}}</div>
         </div>
@@ -46,7 +46,7 @@
           <img src="https://q1.qlogo.cn/g?b=qq&nk=2523059882&s=100" alt="">
         </a>
         <div class="copyright__author">
-          <RouterLink to="/" class="copyright-title">你好明天</RouterLink>
+          <RouterLink to="/" class="copyright-title">快乐是福</RouterLink>
         </div>
         <div class="copyright__notice">
           <div class="copyright-info">
@@ -55,37 +55,60 @@
           </div>
         </div>
         <div class="tool">
-          <!-- <div class="tool-left">
+          <div class="tool-left">
             <div class="controls">
-              <RouterLink class="controls__button" to="/"><i class="iconfont aixinzhijia"></i>赞赏</RouterLink>
+              <a-button
+                type="primary"
+                class="action-btn"
+                @click="handleLike"
+                :class="{ 'liked': articleDetail.isLiked }">
+                <template #icon>
+                  <i class="iconfont bi-heart" :class="{ 'filled': articleDetail.isLiked }"></i>
+                </template>
+                {{ articleDetail.isLiked ? '已点赞' : '点赞' }} ({{ articleDetail.countLike || 0 }})
+              </a-button>
+              <a-button
+                type="default"
+                class="action-btn"
+                @click="handleFavorite"
+                :class="{ 'favorited': articleDetail.isFavorited }">
+                <template #icon>
+                  <i class="iconfont bi-star" :class="{ 'filled': articleDetail.isFavorited }"></i>
+                </template>
+                {{ articleDetail.isFavorited ? '已收藏' : '收藏' }}
+              </a-button>
             </div>
-          </div> -->
+          </div>
           <div class="tool-right">
             <div class="tag_share">
               <div class="meta__tag-list">
-                <RouterLink class="meta__tag" to="/"><span class="tags-punctuation">源码</span><span
-                    class="tagsPageCount">20</span></RouterLink>
+                <RouterLink class="meta__tag" :to="`/category/${articleDetail.categoryId}`"><span >{{articleDetail.categoryName}}</span></RouterLink>
+              </div>
+            </div>
+            <div class="tag_share" v-for="item in articleDetail.tag">
+              <div class="meta__tag-list">
+                <RouterLink class="meta__tag" :to="`/tag/${item.id}`"><span >#{{item.tagName}}</span></RouterLink>
               </div>
             </div>
           </div>
         </div>
       </div>
     </div>
-    <div class="aside-content">
-      <!-- <WidgetSketch></WidgetSketch> -->
-      <!-- <div id="tp-weather-widget"></div> -->
+    <div class="msg">
+      <MessageBoard :article-id="articleId" />
     </div>
   </main>
 </template>
 
 <script setup>
 import { ref, watch, onMounted, computed } from "vue";
-import { getArticleDetail } from "@/api/Article";
+import { getArticleDetail, likeArticle, favoriteArticle } from "@/api/Article";
 import { useRoute } from "vue-router";
-import { MdPreview, MdCatalog } from 'md-editor-v3';
+import { MdPreview } from 'md-editor-v3';
 import {useColorMode, useTitle} from "@vueuse/core";
 import 'md-editor-v3/lib/preview.css';
-
+import { message } from 'ant-design-vue';
+import MessageBoard from './MessageBoard/index.vue';
 
 //根据路由参数获取文章id
 const route = useRoute();
@@ -116,9 +139,14 @@ const getDetail = async () => {
     //处理时间格式
     res.data.createTime = res.data.createTime.split(' ')[0]
     res.data.updateTime = res.data.updateTime.split(' ')[0]
+    
+    // 处理点赞和收藏状态
+    res.data.isLiked = res.data.liked || false;
+    res.data.isFavorited = res.data.favorited || false;
+    
     //获取数据成功赋值
     articleDetail.value = res.data;
-    useTitle(`${articleDetail.value.title} - ${articleDetail.value.categoryName}`);
+    useTitle(`快樂是福-${articleDetail.value.title}`);
     console.log(articleDetail.value);
   }
 };
@@ -144,6 +172,44 @@ function countWords(count) {
     return counts + 'k';
   }
 };
+
+// 处理点赞
+const handleLike = async () => {
+  try {
+    const res = await likeArticle(articleId);
+    if (res.code === 200) {
+      // 更新本地状态
+      articleDetail.value.isLiked = !articleDetail.value.isLiked;
+      articleDetail.value.countLike = articleDetail.value.isLiked 
+        ? (articleDetail.value.countLike || 0) + 1 
+        : (articleDetail.value.countLike || 1) - 1;
+      
+      message.success(articleDetail.value.isLiked ? '点赞成功' : '已取消点赞');
+    } else {
+      message.error(res.msg || '操作失败');
+    }
+  } catch (error) {
+    console.error('点赞操作失败:', error);
+    message.error('操作失败，请稍后重试');
+  }
+};
+
+// 处理收藏
+const handleFavorite = async () => {
+  try {
+    const res = await favoriteArticle(articleId);
+    if (res.code === 200) {
+      // 更新本地状态
+      articleDetail.value.isFavorited = !articleDetail.value.isFavorited;
+      message.success(articleDetail.value.isFavorited ? '收藏成功' : '已取消收藏');
+    } else {
+      message.error(res.msg || '操作失败');
+    }
+  } catch (error) {
+    console.error('收藏操作失败:', error);
+    message.error('操作失败，请稍后重试');
+  }
+};
 </script>
 <style lang="scss" scoped>
 #tp-weather-widget {
@@ -158,8 +224,34 @@ function countWords(count) {
   width: 100%;
   justify-content: center;
   height: 25rem;
-  background-color: rgb(29, 13, 210);
+  background-color: rgb(203, 209, 211);
+  background-size: cover;
+  background-position: center;
   z-index: 0;
+  overflow: hidden;
+  
+  &::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    background-color: rgba(0, 0, 0, 0.3);
+    z-index: 1;
+  }
+  
+  .bg-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(to bottom, rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.7));
+    z-index: 2;
+  }
 }
 
 .info {
@@ -170,7 +262,8 @@ function countWords(count) {
   padding: 0 3rem;
   margin: 0 auto;
   z-index: 10;
-  /*color: var(--Jay-white);*/
+  color: #fff;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
   max-width: 1400px;
   display: flex;
   flex-direction: column;
@@ -194,6 +287,7 @@ function countWords(count) {
         transition: all 0.3s ease 0s;
         overflow-wrap: break-word;
         -webkit-user-drag: none;
+        color: #fff;
       }
 
       .meta-original,
@@ -201,7 +295,7 @@ function countWords(count) {
       .meta__tags {
         height: 32px;
         line-height: 32px;
-        background: var(--deal-text-bg-color) !important;
+        background: rgba(255, 255, 255, 0.2) !important;
         color: #fff !important;
         /*color: var(--Jay-white)!important;*/
         padding: 0 0.5rem;
@@ -222,8 +316,9 @@ function countWords(count) {
       .meta-original,
       .meta-categories {
         &:hover {
-          background: #fff !important;
-          color: blue !important;
+          background: rgba(255, 255, 255, 0.4) !important;
+          color: #fff !important;
+          box-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
         }
       }
 
@@ -237,16 +332,18 @@ function countWords(count) {
           align-items: center;
 
           .meta__tags {
-            background: none !important;
+            background: rgba(255, 255, 255, 0.1) !important;
             border-radius: 8px;
             font-weight: 700;
             transition: 0.3s ease-out;
             margin-left: 10px;
-            opacity: 0.6;
+            opacity: 0.8;
 
             &:hover {
-              background: var(--deal-text-bg-color) !important;
+              background: rgba(255, 255, 255, 0.3) !important;
               color: #fff !important;
+              box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+              opacity: 1;
             }
           }
         }
@@ -265,6 +362,7 @@ function countWords(count) {
     line-clamp: 2;
     padding: 0;
     overflow: hidden;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
   }
 
   /*时间*/
@@ -280,10 +378,13 @@ function countWords(count) {
       flex-wrap: wrap;
       justify-content: flex-start;
       align-items: center;
+      background-color: rgba(0, 0, 0, 0.3);
+      padding: 8px 12px;
+      border-radius: 8px;
 
       div {
-        margin-right: 10px;
-        opacity: 0.6;
+        margin-right: 15px;
+        opacity: 0.9;
       }
     }
   }
@@ -294,19 +395,14 @@ function countWords(count) {
 
 .layout {
   max-width: 1400px;
-  display: flex;
+  // display: flex;
   padding: 1rem 1.5rem;
   margin: 0 auto;
 
-  .aside-content {
-    width: calc(25% - 30px);
-    height: fit-content;
-    margin-right: 10px;
-    margin-left: 15px;
-  }
+
 
   .details {
-    width: calc(100% - 300px);
+    width:100%;
     height: fit-content;
     animation: slide-in 0.6s 0.1s backwards;
     box-shadow: 0 8px 16px -4px #2c2d300c;
@@ -320,7 +416,17 @@ function countWords(count) {
       color: black;
     }
   }
-
+  // .aside-content {
+  //   width: calc(25% - 30px);
+  //   height: fit-content;
+  //   margin-right: 10px;
+  //   margin-left: 15px;
+  // }
+  .msg{
+    width: 100%;
+    height: 100%;
+    margin-top: 20px;
+  }
   // 版权声明
   .copyright {
     display: flex;
@@ -334,7 +440,8 @@ function countWords(count) {
     margin: 1.8rem 0px 0.5rem;
     border-radius: 12px;
     flex-direction: column;
-    align-items: center
+    align-items: center;
+    margin-top: 100px;
   }
 .copyright__author_img{
   width: 66px;
@@ -409,23 +516,36 @@ function countWords(count) {
 
       .controls {
         display: flex;
-        align-items: center;
-        justify-content: center;
-        height: 40px;
-        line-height: 39px;
-        background: #79bbff;
-        border-radius: 8px;
-        padding: 0 16px;
-        border: 1px solid #e3e8f7;
-        box-shadow: 0 8px 16px -4px #2c2d300c;
-        color: #363636;
-
-        .controls__button {
-          // background: #Fff;
-          // border: 1px solid #e3e8f7;
-          // box-shadow: 0 8px 16px -4px #2c2d300c;
+        gap: 15px;
+        
+        .action-btn {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: 0 16px;
+          border-radius: 8px;
           cursor: pointer;
           transition: 0.3s;
+          
+          &.liked {
+            background-color: #ff4d4f;
+            color: white;
+            border-color: #ff4d4f;
+          }
+          
+          &.favorited {
+            background-color: #faad14;
+            color: white;
+            border-color: #faad14;
+          }
+          
+          .iconfont {
+            margin-right: 5px;
+            
+            &.filled {
+              color: currentColor;
+            }
+          }
         }
       }
     }

@@ -11,7 +11,7 @@
         <a-dropdown placement="bottom">
           <img
             class="avatar"
-            src="https://q1.qlogo.cn/g?b=qq&nk=2523059882&s=100"
+            :src="userStore.userInfo.avatar"
             alt=""
           />
           <template #overlay>
@@ -217,6 +217,7 @@ const props = defineProps({
 
 // 组件emits
 const emit = defineEmits(["login-success", "register-success", "cancel"]);
+
 
 const visible = ref(false);
 const activeTab = ref(props.defaultTab);

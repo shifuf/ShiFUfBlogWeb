@@ -10,7 +10,9 @@
         :class="['tag-link', { select: tag.id === path }]"
       >
         <!-- 标签名称 -->
-        <span>{{ tag.name }}</span>
+        <span>
+          {{ props.name=='tagName'? tag.tagName: tag.categoryName }}
+        </span>
       </router-link>
     </div>
     <a-button v-if="props.list.length > 5" type="primary" @click="drawer.open">更多</a-button>
@@ -48,6 +50,9 @@ const path = ref(Number(route.params.id) || 0);
 const props = defineProps({
   list: {
     type: Array,
+  },
+  name: {
+    type: String, 
   },
   path: {
     type: String,

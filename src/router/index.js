@@ -43,13 +43,13 @@ const routes = [
                     title: '标签',
                 }
             },
-            //时间轴
+            // 搜索
             {
-                path: '/timeline',
-                component: () => import('@/views/Timeline/index.vue'),
-                name: 'timeline',
+                path: '/search',
+                component: () => import('@/views/Search/index.vue'),
+                name: 'search',
                 meta: {
-                    title: '时间轴',
+                    title: '搜索文章',
                 }
             },
             //用户中心
@@ -62,27 +62,27 @@ const routes = [
                 }
             },
 
-
+            // 关于
+            {
+                path: '/about',
+                component: () => import('@/views/About/index.vue'),
+                name: 'about',
+                meta: {
+                    title: '关于本站',
+                }
+            },
+            // 留言板
+            {
+                path: '/message',
+                component: () => import('@/views/Message/index.vue'),
+                name: 'message',
+                meta: {
+                    title: '留言板',
+                }
+            },
         ]
     },
-    // 关于
-    {
-        path: '/about',
-        component: () => import('@/views/About/index.vue'),
-        name: 'about',
-        meta: {
-            title: '关于本站',
-        }
-    },
-    // 留言板
-    {
-        path: '/message',
-        component: () => import('@/views/Message/index.vue'),
-        name: 'message',
-        meta: {
-            title: '留言板',
-        }
-    },
+
 ]
 
 // 3. 创建路由实例并传递 `routes` 配置.

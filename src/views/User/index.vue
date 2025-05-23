@@ -8,21 +8,26 @@
             <div class="user_content">
               <div class="avatar-uploader">
                 <div class="user-profile">
-                  <!-- 头像区域 -->
-                  <div class="avatar-container" @click="handleAvatarClick">
-                    <a-avatar
-                      :size="80"
-                      :src="userinfo.avatar"
-                      shape="circle"
-                    />
-                    <!-- 隐藏的文件输入框 -->
-                    <input
-                      ref="uploadInput"
-                      type="file"
-                      accept="image/*"
-                      style="display: none"
-                      @change="handleChangeUpdate"
-                    />
+                  <!-- 头像区域使用 Ant Design Vue 的 Upload 组件 -->
+                  <div class="avatar-container">
+                    <a-upload
+                      name="file"
+                      :show-upload-list="false"
+                      :custom-request="customUpload"
+                      :before-upload="beforeUpload"
+                    >
+                      <div class="avatar-wrapper">
+                        <a-avatar
+                          :size="80"
+                          :src="userinfo.avatar"
+                          shape="circle"
+                        />
+                        <div class="upload-hover-mask">
+                          <upload-outlined />
+                          <p>点击上传</p>
+                        </div>
+                      </div>
+                    </a-upload>
                   </div>
 
                   <!-- 用户信息 -->
@@ -113,10 +118,15 @@
 
 <script setup>
 import { onMounted, ref } from "vue";
+import { UploadOutlined } from '@ant-design/icons-vue';
 import { getArticleListByUserId } from "@/api/Article";
 import { sendVerificationCode } from "@/api/auth";
-import { getCurrentUser,updateCurrentUser,updateEmail } from "@/api/User";
+import { getCurrentUser, updateCurrentUser, updateEmail, updateAvatar } from "@/api/User";
+import { uploadImage } from "@/api/File";
 import { message } from "ant-design-vue";
+import { useUserStore } from "@/stores/modules/user";
+
+const userStore = useUserStore();
 // 当前激活的Tab键值
 const activeKey = ref("0");
 //个人信息
@@ -128,30 +138,6 @@ const userinfo = ref({
   code:undefined,
 });
 
-// 引用文件输入框元素
-const uploadInput = ref(null);
-
-// 触发文件选择器
-const handleAvatarClick = () => {
-  uploadInput.value.click();
-};
-
-// 处理文件选择事件
-const handleChangeUpdate = (event) => {
-  const file = event.target.files[0];
-  if (!file) return;
-
-  // 创建一个 FileReader 对象用于读取文件内容
-  const reader = new FileReader();
-  reader.onload = (e) => {
-    user.value.avatar = e.target.result;
-    message.success("头像更新成功！");
-  };
-  reader.readAsDataURL(file);
-
-  // 清空文件输入框，以便下次点击时可以重新选择文件
-  event.target.value = null;
-};
 // 文章列表
 const acticList = ref([]);
 
@@ -231,10 +217,65 @@ const updateUserEmail = async () => {
   }
  
 };
+
+// 头像上传前的验证
+const beforeUpload = (file) => {
+  const isImage = file.type.startsWith('image/');
+  if (!isImage) {
+    message.error('只能上传图片文件!');
+  }
+  const isLt2M = file.size / 1024 / 1024 < 2;
+  if (!isLt2M) {
+    message.error('图片必须小于2MB!');
+  }
+  return isImage && isLt2M;
+};
+
+// 自定义上传方法
+const customUpload = async ({ file }) => {
+  try {
+    // 显示上传中的消息
+    const loadingMessage = message.loading('头像上传中...', 0);
+    
+    // 构建FormData
+    const formData = new FormData();
+    formData.append('file', file);
+    
+    // 调用上传图片API
+    const uploadRes = await uploadImage(formData);
+    
+    if (uploadRes.code === 200) {
+      // 获取上传后的图片URL
+      const avatarUrl = uploadRes.data.url;
+      
+      // 调用更新头像API
+      const updateRes = await updateAvatar(avatarUrl);
+      
+      if (updateRes.code === 200) {
+        // 更新本地用户信息
+        getUserInfo();
+        message.success('头像更新成功!');
+      } else {
+        message.error('头像更新失败!');
+      }
+    } else {
+      message.error('图片上传失败!');
+    }
+    
+    // 关闭加载消息
+    loadingMessage();
+  } catch (error) {
+    console.error('上传过程中发生错误:', error);
+    message.error('上传失败，请稍后重试');
+  }
+};
+
 /**
  * 获取当前用户信息
  */
 const getUserInfo = async () => {
+  //更新本地用户信息
+  await userStore.fetchUserInfo();
   const res = await getCurrentUser();
   if (res.code === 200) {
     userinfo.value = res.data;
@@ -330,6 +371,43 @@ onMounted(() => {
             font-weight: bold;
           }
         }
+      }
+    }
+  }
+}
+
+.avatar-container {
+  margin-right: 20px;
+  text-align: center;
+  cursor: pointer;
+  
+  .avatar-wrapper {
+    position: relative;
+    display: inline-block;
+    
+    &:hover .upload-hover-mask {
+      opacity: 1;
+    }
+    
+    .upload-hover-mask {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      background-color: rgba(0, 0, 0, 0.5);
+      border-radius: 50%;
+      opacity: 0;
+      transition: opacity 0.3s;
+      color: white;
+      
+      p {
+        margin: 0;
+        font-size: 12px;
       }
     }
   }

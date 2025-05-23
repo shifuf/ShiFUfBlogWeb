@@ -24,6 +24,17 @@ export function updateEmail(email, code) {
       data: { email, code } 
     }) 
   }
+/**
+ * 更新用户头像
+ * @param {string} avatar 头像地址
+ */
+export function updateAvatar(avatar) {
+   return request({
+     url: '/user/updateAvatar',
+     method: 'post',
+     data: { avatar } 
+   }) 
+ }
 
   /**
    * 更新当前用户信息

@@ -92,8 +92,8 @@
         <div class="data-item">
           <i class="bi bi-calendar"></i>
           <div>
-            <span class="label">建站时间</span>
-            <span class="value">2024年</span>
+            <span class="label">站点开发时间</span>
+            <span class="value">2025年</span>
           </div>
         </div>
         <div class="data-item">

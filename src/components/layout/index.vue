@@ -1,13 +1,17 @@
 <template>
-  <div class="layout" :class="{ 'scrolled': isScrolled }">
-    <Header />
-    <!-- 返回顶部按钮 -->
-    <div class="back-to-top" v-show="isScrolled" @click="scrollToTop">
-      <i class="bi bi-arrow-up-circle-fill"></i>
+  <div class="layout-container">
+    <div class="layout" :class="{ 'scrolled': isScrolled }">
+      <Header />
+      <!-- 返回顶部按钮 -->
+      <div class="back-to-top" v-show="isScrolled" @click="scrollToTop">
+        <i class="bi bi-arrow-up-circle-fill"></i>
+      </div>
     </div>
+    <div class="main-content">
+      <router-view></router-view>
+    </div>
+    <Footer />
   </div>
-  <router-view></router-view>
-  <Footer />
 </template>
 
 <script setup>
@@ -42,6 +46,16 @@ onUnmounted(() => {
 
 </script>
 <style lang=scss scoped>
+.layout-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.main-content {
+  flex: 1;
+}
+
 .layout {
   width: 100%;
   height: 100px;

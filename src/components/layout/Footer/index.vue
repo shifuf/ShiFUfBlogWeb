@@ -38,12 +38,12 @@ onMounted(() => {
   border-top: 1px solid #e3e8f7;
   padding: 3rem 0 1rem;
   margin-top: 3rem;
+  width: 100%;
 
   .footer-content {
     max-width: 1400px;
     margin: 0 auto;
     padding: 0 20px;
-
 
     .footer-bottom {
       text-align: center;

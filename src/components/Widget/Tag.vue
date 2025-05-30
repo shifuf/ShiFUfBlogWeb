@@ -22,16 +22,16 @@
       <router-link
         v-for="tag in props.list"
         :id="tag.id"
-        :to="`/category/${tag.id}`"
+        :to="`/${props.path}/${tag.id}`"
         :style="{ order: tag.id === path ? -1 : '' }"
         :class="['tag-link', { select: tag.id === path }]"
         @click="getTag(tag.id)"
       >
         <!-- 标签名称 -->
         <span class="tags-punctuation"></span>
-        <span>{{ tag.name }}</span>
+        <span> {{ props.name=='tagName'? tag.tagName: tag.categoryName }}</span>
         <!-- 标签下文章数量 -->
-        <span class="tagsPageCount">{{ tag.count }}</span>
+        <!-- <span class="tagsPageCount">{{ tag.count }}</span> -->
       </router-link>
     </div>
   </Drawer>

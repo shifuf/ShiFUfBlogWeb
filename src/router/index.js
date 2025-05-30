@@ -88,7 +88,16 @@ const routes = [
 // 3. 创建路由实例并传递 `routes` 配置.
 const router = createRouter({
     history: createWebHistory(), // 使用 HTML5 History 模式
-    routes
+    routes,
+    // 添加 scrollBehavior 配置，处理页面切换时的滚动行为
+    scrollBehavior(to, from, savedPosition) {
+        // 如果存在 savedPosition（如浏览器的前进/后退按钮触发的导航），则使用它
+        if (savedPosition) {
+            return savedPosition;
+        }
+        // 否则滚动到页面顶部
+        return { top: 0 }
+    }
 })
 
 // 4. 导出路由对象

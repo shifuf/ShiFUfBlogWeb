@@ -99,7 +99,7 @@
         </div>
       </div>
 
-      <div class="sider_content">右侧</div>
+      <!-- <div class="sider_content">右侧</div> -->
     </div>
   </main>
 </template>
@@ -169,15 +169,16 @@ onMounted(() => {
   max-width: 1400px;
   // display: flex;
   // justify-content: space-between;
-  height: 80vh;
+  // height: 80vh;
   margin: 0 auto;
   padding: 10rem 20px;
+  z-index: 999;
   .box_card {
     display: flex;
   }
   //左侧
   .content {
-    width: calc(100% - 300px);
+    width: calc(100%);
     height: fit-content;
     animation: slide-in 0.6s 0.1s backwards;
     box-shadow: 0 8px 16px -4px #2c2d300c;

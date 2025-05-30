@@ -98,7 +98,7 @@
         </div>
       </div>
 
-      <div class="sider_content">右侧</div>
+      <!-- <div class="sider_content">右侧</div> -->
     </div>
   </main>
 </template>
@@ -172,13 +172,15 @@ onMounted(() => {
   // justify-content: space-between;
   margin: 0 auto;
   padding: 10rem 20px;
-  height: 80vh;
+  min-height: 70vh; // Add minimum height to ensure content pushes footer down
+  // height: 80vh;
+  
   .box_card {
     display: flex;
   }
   //左侧
   .content {
-    width: calc(100% - 300px);
+    width: calc(100%);
     height: fit-content;
     animation: slide-in 0.6s 0.1s backwards;
     box-shadow: 0 8px 16px -4px #2c2d300c;

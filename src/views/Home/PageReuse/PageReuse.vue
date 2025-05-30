@@ -12,7 +12,7 @@
           <!-- 文章图片 -->
           <div class="item-img">
             <RouterLink :to="'/article/'+item.id">
-              <a-image class="img" :src="item.articleCover" :alt="item.title" lazy />
+              <a-image class="img" :src="item.articleCover" :alt="item.title" :preview="false" lazy />
               <div class="cat-float">
                 {{ item.categoryName }}
               </div>
@@ -83,8 +83,8 @@ const props = defineProps({
     justify-content: space-between;
     align-items: flex-start;
     align-content: flex-start;
-    width: calc(100% - 300px);
-    width: 75%;
+    // width: calc(100%);
+    // width: 75%;
     height: fit-content;
     // background: blue;
 
